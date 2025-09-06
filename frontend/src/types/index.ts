@@ -2,6 +2,7 @@
 export interface User {
   id: string;
   username: string;
+  fullName?: string;
   email: string;
   roles: string[];
   createdAt: string;
@@ -31,6 +32,7 @@ export interface Document {
 export interface Comment {
   id: string;
   content: string;
+  authorName: string;
   author: User;
   document: Document;
   createdAt: string;
@@ -49,19 +51,19 @@ export interface Rating {
 
 // API Request/Response types
 export interface LoginRequest {
-  username: string;
-  password: string;
+  username?: string;
+  password?: string;
 }
 
 export interface LoginResponse {
-  token: string;
   user: User;
+  token: string;
 }
 
 export interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
+  username?: string;
+  email?: string;
+  password?: string;
 }
 
 export interface DocumentUploadRequest {
@@ -78,8 +80,8 @@ export interface DocumentSearchRequest {
   visibility?: 'PRIVATE' | 'GROUP' | 'PUBLIC';
   startDate?: string;
   endDate?: string;
-  page?: number;
-  size?: number;
+  page: number;
+  size: number;
 }
 
 export interface DocumentSearchResponse {
@@ -113,7 +115,6 @@ export interface DocumentFormData {
   description: string;
   tags: string[];
   visibility: 'PRIVATE' | 'GROUP' | 'PUBLIC';
-  file?: File;
 }
 
 // API Error types

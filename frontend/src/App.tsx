@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
-import { useAuthStore } from '@/stores/authStore';
 import Layout from '@/components/Layout';
 import Login from '@/pages/Login';
 import Home from '@/pages/Home';
@@ -10,7 +9,8 @@ import DocumentDetail from '@/pages/DocumentDetail';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 const App: React.FC = () => {
-  const { isAuthenticated } = useAuthStore();
+  // Temporarily disable authentication for testing
+  const isAuthenticated = false;
 
   return (
     <ConfigProvider
