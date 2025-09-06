@@ -46,6 +46,11 @@ const Sidebar: React.FC = () => {
       label: 'Quản trị người dùng',
       icon: <TeamOutlined />,
       path: '/admin/users'
+    }, {
+      key: '/admin/test',
+      label: 'Admin Test',
+      icon: <TeamOutlined />,
+      path: '/admin/test'
     }] : []),
   ];
 

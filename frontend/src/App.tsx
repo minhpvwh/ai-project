@@ -10,6 +10,7 @@ import DocumentDetail from '@/pages/DocumentDetail';
 import UserManagement from '@/pages/UserManagement';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AdminRoute from '@/components/AdminRoute';
+import AdminTest from '@/components/AdminTest';
 
 const App: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
@@ -48,6 +49,7 @@ const App: React.FC = () => {
                     <UserManagement />
                   </AdminRoute>
                 } />
+                <Route path="admin/test" element={<AdminTest />} />
               </Route>
             </Routes>
           </div>

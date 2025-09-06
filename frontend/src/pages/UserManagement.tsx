@@ -25,6 +25,10 @@ interface UserFormData {
 const UserManagement: React.FC = () => {
   const { message } = App.useApp();
   const { user } = useAuthStore();
+
+  // Debug logging
+  console.log('UserManagement - Component rendered');
+  console.log('UserManagement - User:', user);
   const [users, setUsers] = useState<UserManagementDto[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
