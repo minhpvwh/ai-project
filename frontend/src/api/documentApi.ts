@@ -1,5 +1,5 @@
 import api from './api';
-import { Document, DocumentSearchRequest, DocumentSearchResponse } from '@/types';
+import { Document, DocumentDto, DocumentSearchRequest, DocumentSearchResponse } from '@/types';
 
 export const documentApi = {
   search: async (params: DocumentSearchRequest): Promise<DocumentSearchResponse> => {
@@ -7,7 +7,7 @@ export const documentApi = {
     return response.data;
   },
 
-  getById: async (id: string): Promise<Document> => {
+  getById: async (id: string): Promise<DocumentDto> => {
     const response = await api.get(`/documents/${id}`);
     return response.data;
   },

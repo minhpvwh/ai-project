@@ -52,9 +52,8 @@ const Search: React.FC = () => {
   });
 
   useEffect(() => {
-    if (searchParams.get('q') || searchParams.get('my') === 'true') {
-      handleSearch()
-    }
+    // Luôn load tài liệu khi vào trang (mặc định hiển thị tất cả)
+    handleSearch()
   }, [])
 
   const handleSearch = async (page: number = 0, append: boolean = false) => {

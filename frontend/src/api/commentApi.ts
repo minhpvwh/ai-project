@@ -3,12 +3,12 @@ import { Comment, CommentRequest, DocumentSearchResponse } from '@/types';
 
 export const commentApi = {
   getByDocument: async (documentId: string): Promise<{ content: Comment[] }> => {
-    const response = await api.get(`/comments/document/${documentId}`);
+    const response = await api.get(`/comments/${documentId}`);
     return response.data;
   },
 
   add: async (documentId: string, content: string): Promise<Comment> => {
-    const response = await api.post('/comments', { documentId, content });
+    const response = await api.post(`/comments/${documentId}`, { content });
     return response.data;
   },
 

@@ -21,7 +21,7 @@ import {
   CalendarOutlined, 
   UserOutlined, 
   TagsOutlined, 
-  StarFilled,
+  StarOutlined,
   EditOutlined,
   DeleteOutlined,
   FileTextOutlined
@@ -59,9 +59,22 @@ const DocumentDetail: React.FC = () => {
   const fetchDocumentDetails = async () => {
     try {
       const data = await documentApi.getById(id!);
-      setDocument(data);
-      setIsOwner(data.owner.id === user?.id);
-    } catch (error) {
+      // Transform backend response to frontend format
+      const transformedDocument = {
+        ...data,
+        owner: {
+          id: data.ownerId,
+          username: data.ownerName,
+          fullName: data.ownerName,
+          email: '',
+          roles: [],
+          createdAt: ''
+        }
+      };
+      setDocument(transformedDocument);
+      setIsOwner(data.ownerId === user?.id);
+    } catch (error: any) {
+      console.error('Error fetching document details:', error);
       message.error('Không thể tải thông tin tài liệu');
       navigate('/');
     } finally {
@@ -73,8 +86,13 @@ const DocumentDetail: React.FC = () => {
     try {
       const response = await commentApi.getByDocument(id!);
       setComments(response.content);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching comments:', error);
+      if (error.response?.status === 403) {
+        message.warning('Bạn cần đăng nhập để xem bình luận');
+      } else if (error.response?.status !== 404) {
+        message.error('Không thể tải bình luận');
+      }
     }
   };
 
@@ -82,8 +100,13 @@ const DocumentDetail: React.FC = () => {
     try {
       const data = await ratingApi.getUserRating(id!);
       setUserRating(data.hasRating ? data.score : null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user rating:', error);
+      if (error.response?.status === 403) {
+        message.warning('Bạn cần đăng nhập để xem đánh giá');
+      } else if (error.response?.status !== 404) {
+        message.error('Không thể tải đánh giá');
+      }
     }
   };
 
@@ -240,7 +263,7 @@ const DocumentDetail: React.FC = () => {
             <Space size="large" style={{ marginBottom: '16px' }}>
               <Space>
                 <UserOutlined style={{ color: '#8c8c8c' }} />
-                <Text type="secondary">{document.owner.username}</Text>
+                <Text type="secondary">{document.owner?.username || 'Unknown'}</Text>
               </Space>
               <Space>
                 <CalendarOutlined style={{ color: '#8c8c8c' }} />
@@ -302,7 +325,7 @@ const DocumentDetail: React.FC = () => {
               <Card title="Tags">
                 <Space wrap>
                   {document.tags.map((tag, index) => (
-                    <Tag key={index} icon={<TagsFilled />}>
+                    <Tag key={index} icon={<TagsOutlined />}>
                       {tag}
                     </Tag>
                   ))}
@@ -360,7 +383,7 @@ const DocumentDetail: React.FC = () => {
             <Card title="Đánh giá">
               <div style={{ textAlign: 'center', marginBottom: '16px' }}>
                 <Space align="center" style={{ marginBottom: '8px' }}>
-                  <StarFilled style={{ fontSize: '24px', color: '#faad14' }} />
+                  <StarOutlined style={{ fontSize: '24px', color: '#faad14' }} />
                   <Title level={2} style={{ margin: 0, color: '#faad14' }}>
                     {document.averageRating.toFixed(1)}
                   </Title>

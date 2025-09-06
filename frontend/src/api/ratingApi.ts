@@ -3,17 +3,17 @@ import { Rating, RatingRequest } from '@/types';
 
 export const ratingApi = {
   getByDocument: async (documentId: string): Promise<Rating[]> => {
-    const response = await api.get(`/ratings/document/${documentId}`);
-    return response.data;
+    const response = await api.get(`/ratings/${documentId}/all`);
+    return response.data.ratings;
   },
 
   getUserRating: async (documentId: string): Promise<{ hasRating: boolean; score?: number }> => {
-    const response = await api.get(`/ratings/user/${documentId}`);
+    const response = await api.get(`/ratings/${documentId}/user`);
     return response.data;
   },
 
   addOrUpdateRating: async (documentId: string, score: number): Promise<Rating> => {
-    const response = await api.post('/ratings', { documentId, score });
+    const response = await api.post(`/ratings/${documentId}`, { score });
     return response.data;
   },
 

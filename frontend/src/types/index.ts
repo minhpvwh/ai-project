@@ -28,6 +28,26 @@ export interface Document {
   updatedAt: string;
 }
 
+// Backend Document DTO (what we receive from API)
+export interface DocumentDto {
+  id: string;
+  title: string;
+  description: string;
+  summary?: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  tags: string[];
+  visibility: 'PRIVATE' | 'GROUP' | 'PUBLIC';
+  ownerName: string;
+  ownerId: string;
+  viewCount: number;
+  averageRating: number;
+  totalRatings: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Comment types
 export interface Comment {
   id: string;

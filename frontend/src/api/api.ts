@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { message } from 'antd';
 import { ApiError } from '@/types';
+import { useAuthStore } from '@/stores/authStore';
 
 const API_BASE_URL = '/api';
 
@@ -20,10 +21,13 @@ api.interceptors.request.use(
         const authData = JSON.parse(token);
         if (authData.state?.token && config.headers) {
           config.headers.Authorization = `Bearer ${authData.state.token}`;
+          console.log('Auth token added to request:', config.url);
         }
       } catch (error) {
         console.error('Error parsing auth token:', error);
       }
+    } else {
+      console.log('No auth token found for request:', config.url);
     }
     return config;
   },
