@@ -23,10 +23,13 @@ import {
   DeleteOutlined, 
   CheckCircleOutlined,
   ExclamationCircleOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  RobotOutlined,
+  ReloadOutlined
 } from '@ant-design/icons';
-import { documentApi } from '@/api/documentApi';
-import { DocumentFormData } from '@/types';
+import { documentApi } from '../api/documentApi';
+import { aiApi, AIProcessResponse } from '../api/aiApi';
+import { DocumentFormData } from '../types';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -37,10 +40,12 @@ const UploadPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isProcessingAI, setIsProcessingAI] = useState<boolean>(false);
+  const [aiResult, setAiResult] = useState<AIProcessResponse | null>(null);
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
-  const handleFileSelect = (info: any) => {
+  const handleFileSelect = async (info: any) => {
     const file = info.file.originFileObj || info.file;
     
     if (file) {
@@ -65,11 +70,60 @@ const UploadPage: React.FC = () => {
       }
 
       setSelectedFile(file);
+      
+      // Tự động xử lý AI khi chọn file
+      await processFileWithAI(file);
+    }
+  };
+
+  const processFileWithAI = async (file: File) => {
+    setIsProcessingAI(true);
+    setAiResult(null);
+    
+    try {
+      message.loading('Đang kiểm tra AI service...', 0);
+      
+      // Kiểm tra trạng thái AI service qua backend
+      const backendStatus = await aiApi.getBackendAIStatus();
+      
+      if (!backendStatus.available) {
+        message.destroy();
+        message.warning('AI service không khả dụng, bạn có thể nhập thông tin thủ công');
+        return;
+      }
+      
+      message.loading('Đang xử lý tài liệu với AI...', 0);
+      
+      const result = await aiApi.processFile(file);
+      
+      if (result.success) {
+        setAiResult(result);
+        
+        // Tự động điền thông tin từ AI
+        form.setFieldsValue({
+          description: result.summary,
+          tags: result.tags
+        });
+        
+        message.destroy();
+        message.success('AI đã tạo tóm tắt và tags cho tài liệu!');
+      } else {
+        message.destroy();
+        message.warning('Không thể xử lý tài liệu với AI, bạn có thể nhập thông tin thủ công');
+      }
+    } catch (error) {
+      console.error('AI processing error:', error);
+      message.destroy();
+      message.warning('AI service không khả dụng, bạn có thể nhập thông tin thủ công');
+    } finally {
+      setIsProcessingAI(false);
     }
   };
 
   const removeFile = () => {
     setSelectedFile(null);
+    setAiResult(null);
+    form.resetFields(['description', 'tags']);
   };
 
   const onSubmit = async (values: DocumentFormData) => {
@@ -221,6 +275,82 @@ const UploadPage: React.FC = () => {
             )}
           </Card>
 
+          {/* AI Processing Status */}
+          {isProcessingAI && (
+            <Card>
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <RobotOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '16px' }} />
+                <div>
+                  <Text strong style={{ fontSize: '16px' }}>AI đang xử lý tài liệu...</Text>
+                  <br />
+                  <Text type="secondary">Đang tạo tóm tắt và gợi ý tags</Text>
+                </div>
+                <Progress 
+                  percent={50} 
+                  status="active"
+                  style={{ marginTop: '16px', maxWidth: '300px', margin: '16px auto 0' }}
+                />
+              </div>
+            </Card>
+          )}
+
+          {/* AI Results */}
+          {aiResult && (
+            <Card 
+              title={
+                <Space>
+                  <RobotOutlined style={{ color: '#52c41a' }} />
+                  <span>Kết quả xử lý AI</span>
+                </Space>
+              }
+              extra={
+                <Button 
+                  size="small" 
+                  icon={<ReloadOutlined />}
+                  onClick={() => selectedFile && processFileWithAI(selectedFile)}
+                  loading={isProcessingAI}
+                >
+                  Xử lý lại
+                </Button>
+              }
+              style={{ border: '1px solid #52c41a' }}
+            >
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <div>
+                  <Text strong>Ngôn ngữ phát hiện: </Text>
+                  <Text code>{aiResult.language === 'vi' ? 'Tiếng Việt' : 'English'}</Text>
+                </div>
+                <div>
+                  <Text strong>Tags được gợi ý: </Text>
+                  <Space wrap>
+                    {aiResult.tags.map((tag, index) => (
+                      <span key={index} style={{ 
+                        background: '#f0f0f0', 
+                        padding: '2px 8px', 
+                        borderRadius: '4px',
+                        fontSize: '12px'
+                      }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </Space>
+                </div>
+                <div>
+                  <Text strong>Tóm tắt: </Text>
+                  <div style={{ 
+                    background: '#f6ffed', 
+                    padding: '12px', 
+                    borderRadius: '6px',
+                    border: '1px solid #b7eb8f',
+                    marginTop: '8px'
+                  }}>
+                    <Text>{aiResult.summary}</Text>
+                  </div>
+                </div>
+              </Space>
+            </Card>
+          )}
+
           {/* Document Information */}
           <Card title="Thông tin tài liệu">
             <Row gutter={[16, 16]}>
@@ -240,7 +370,16 @@ const UploadPage: React.FC = () => {
               <Col span={24}>
                 <Form.Item
                   name="description"
-                  label="Mô tả"
+                  label={
+                    <Space>
+                      <span>Mô tả</span>
+                      {aiResult && (
+                        <span style={{ color: '#52c41a', fontSize: '12px' }}>
+                          (Đã được AI tạo tự động)
+                        </span>
+                      )}
+                    </Space>
+                  }
                   rules={[
                     { required: true, message: 'Vui lòng nhập mô tả!' },
                     { min: 10, message: 'Mô tả phải có ít nhất 10 ký tự!' }
@@ -258,7 +397,16 @@ const UploadPage: React.FC = () => {
               <Col span={24}>
                 <Form.Item
                   name="tags"
-                  label="Tags"
+                  label={
+                    <Space>
+                      <span>Tags</span>
+                      {aiResult && (
+                        <span style={{ color: '#52c41a', fontSize: '12px' }}>
+                          (Đã được AI gợi ý)
+                        </span>
+                      )}
+                    </Space>
+                  }
                   tooltip="Nhập tags cách nhau bởi dấu phẩy để giúp tài liệu dễ tìm kiếm hơn"
                 >
                   <Select
@@ -339,14 +487,14 @@ const UploadPage: React.FC = () => {
                 size="large" 
                 block
                 htmlType="submit"
-                loading={isUploading}
-                disabled={!selectedFile}
+                loading={isUploading || isProcessingAI}
+                disabled={!selectedFile || isProcessingAI}
                 style={{
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   border: 'none'
                 }}
               >
-                {isUploading ? 'Đang upload...' : 'Upload tài liệu'}
+                {isProcessingAI ? 'Đang xử lý AI...' : isUploading ? 'Đang upload...' : 'Upload tài liệu'}
               </Button>
             </Col>
           </Row>

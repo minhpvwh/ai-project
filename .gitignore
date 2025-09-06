@@ -121,3 +121,9 @@ Desktop.ini
 uploads/
 files/
 temp/
+
+# AI Backend
+backend-ai/venv/
+backend-ai/__pycache__/
+backend-ai/*.pyc
+backend-ai/.env

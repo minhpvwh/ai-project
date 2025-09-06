@@ -6,6 +6,7 @@ import com.knowledgehub.entity.User;
 import com.knowledgehub.security.JwtUtil;
 import com.knowledgehub.service.DocumentService;
 import com.knowledgehub.service.UserService;
+import com.knowledgehub.service.AIService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,9 @@ public class DocumentController {
     @Autowired
     private JwtUtil jwtUtil;
     
+    @Autowired
+    private AIService aiService;
+    
     private User getCurrentUser(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
@@ -51,16 +55,47 @@ public class DocumentController {
     public ResponseEntity<?> uploadDocument(
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
-            @RequestParam("description") String description,
+            @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "tags", required = false) List<String> tags,
             @RequestParam(value = "visibility", defaultValue = "PRIVATE") String visibility,
+            @RequestParam(value = "useAI", defaultValue = "true") boolean useAI,
             HttpServletRequest request) {
         
         try {
             User currentUser = getCurrentUser(request);
             DocumentEntity.Visibility vis = DocumentEntity.Visibility.valueOf(visibility.toUpperCase());
             
-            DocumentEntity document = documentService.uploadDocument(file, title, description, tags, vis, currentUser);
+            String finalDescription = description;
+            List<String> finalTags = tags;
+            
+            // Tích hợp AI nếu được yêu cầu và AI service khả dụng
+            if (useAI && aiService.isAIServiceAvailable()) {
+                try {
+                    AIService.AIProcessResult aiResult = aiService.processFile(file);
+                    if (aiResult.isSuccess()) {
+                        // Sử dụng kết quả AI nếu description hoặc tags chưa được cung cấp
+                        if (finalDescription == null || finalDescription.trim().isEmpty()) {
+                            finalDescription = aiResult.getSummary();
+                        }
+                        if (finalTags == null || finalTags.isEmpty()) {
+                            finalTags = aiResult.getTags();
+                        }
+                        
+                        System.out.println("AI processed document: " + title);
+                        System.out.println("AI Summary: " + aiResult.getSummary());
+                        System.out.println("AI Tags: " + aiResult.getTags());
+                    }
+                } catch (Exception e) {
+                    System.err.println("AI processing failed, using manual input: " + e.getMessage());
+                }
+            }
+            
+            // Đảm bảo có description
+            if (finalDescription == null || finalDescription.trim().isEmpty()) {
+                finalDescription = "Tài liệu được upload bởi " + currentUser.getFullName();
+            }
+            
+            DocumentEntity document = documentService.uploadDocument(file, title, finalDescription, finalTags, vis, currentUser);
             DocumentDto dto = new DocumentDto(document);
             
             return ResponseEntity.ok(dto);
@@ -245,6 +280,21 @@ public class DocumentController {
             
             return new ResponseEntity<>(fileContent, headers, org.springframework.http.HttpStatus.OK);
             
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+    
+    @GetMapping("/ai/status")
+    public ResponseEntity<?> getAIStatus() {
+        try {
+            boolean isAvailable = aiService.isAIServiceAvailable();
+            Map<String, Object> response = new HashMap<>();
+            response.put("available", isAvailable);
+            response.put("message", isAvailable ? "AI service is available" : "AI service is not available");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
