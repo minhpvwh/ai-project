@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/documents/public/**").permitAll()
                 .requestMatchers("/documents/search").permitAll()
+                .requestMatchers("/documents/*/download").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

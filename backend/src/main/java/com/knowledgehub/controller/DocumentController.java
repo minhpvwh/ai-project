@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -228,12 +229,21 @@ public class DocumentController {
                 throw new RuntimeException("Access denied");
             }
             
-            Map<String, String> response = new HashMap<>();
-            response.put("filePath", document.getFilePath());
-            response.put("fileName", document.getFileName());
-            response.put("fileType", document.getFileType());
+            // Read file content
+            java.io.File file = new java.io.File(document.getFilePath());
+            if (!file.exists()) {
+                throw new RuntimeException("File not found on server");
+            }
             
-            return ResponseEntity.ok(response);
+            byte[] fileContent = java.nio.file.Files.readAllBytes(file.toPath());
+            
+            // Set appropriate headers for file download
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.parseMediaType(document.getFileType()));
+            headers.setContentDispositionFormData("attachment", document.getFileName());
+            headers.setContentLength(fileContent.length);
+            
+            return new ResponseEntity<>(fileContent, headers, org.springframework.http.HttpStatus.OK);
             
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();

@@ -2,6 +2,7 @@ package com.knowledgehub.entity;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,11 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
     private boolean active;
+    private boolean enabled = true;
+    private boolean accountNonLocked = true;
+    
+    @DBRef
+    private List<DocumentEntity> documents;
 
     // Constructors
     public User() {
@@ -118,5 +124,29 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    public void setAccountNonLocked(boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
+    }
+
+    public List<DocumentEntity> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(List<DocumentEntity> documents) {
+        this.documents = documents;
     }
 }

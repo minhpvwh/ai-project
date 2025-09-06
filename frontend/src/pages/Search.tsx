@@ -10,10 +10,8 @@ import {
   Row, 
   Col, 
   Empty, 
-  Spin,
-  Tag,
-  Divider,
-  App
+  App,
+  Pagination
 } from 'antd';
 import { 
   SearchOutlined, 
@@ -42,7 +40,8 @@ const Search: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [totalElements, setTotalElements] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(12);
 
   const [filters, setFilters] = useState<SearchFilters>({
     q: searchParams.get('q') || '',
@@ -56,12 +55,12 @@ const Search: React.FC = () => {
     handleSearch()
   }, [])
 
-  const handleSearch = async (page: number = 0, append: boolean = false) => {
+  const handleSearch = async (page: number = 0) => {
     setIsLoading(true);
     try {
       const params: DocumentSearchRequest = {
         page,
-        size: 12
+        size: pageSize
       };
 
       if (filters.q.trim()) {
@@ -77,18 +76,27 @@ const Search: React.FC = () => {
       }
 
       const response: DocumentSearchResponse = filters.my 
-        ? await documentApi.getMyDocuments(page, 12)
+        ? await documentApi.getMyDocuments(page, pageSize)
         : await documentApi.search(params);
 
-      if (append) {
-        setDocuments(prev => [...prev, ...response.content]);
-      } else {
-        setDocuments(response.content);
-      }
+      // Transform DocumentDto to Document
+      const transformedDocuments = response.content.map(dto => ({
+        ...dto,
+        filePath: '', // Add missing filePath property
+        owner: {
+          id: dto.ownerId,
+          username: dto.ownerName,
+          fullName: dto.ownerName,
+          email: '',
+          roles: [],
+          createdAt: ''
+        }
+      }));
 
+      setDocuments(transformedDocuments);
       setCurrentPage(response.number);
       setTotalPages(response.totalPages);
-      setHasMore(!response.last);
+      setTotalElements(response.totalElements);
     } catch (error) {
       message.error('Không thể tìm kiếm tài liệu');
     } finally {
@@ -100,13 +108,16 @@ const Search: React.FC = () => {
     e.preventDefault();
     setCurrentPage(0);
     updateSearchParams();
-    handleSearch(0, false);
+    handleSearch(0);
   };
 
-  const handleLoadMore = () => {
-    if (hasMore && !isLoading) {
-      handleSearch(currentPage + 1, true);
+  const handlePageChange = (page: number, size?: number) => {
+    const newPage = page - 1; // Ant Design pagination starts from 1, but API starts from 0
+    setCurrentPage(newPage);
+    if (size && size !== pageSize) {
+      setPageSize(size);
     }
+    handleSearch(newPage);
   };
 
   const updateSearchParams = () => {
@@ -239,7 +250,8 @@ const Search: React.FC = () => {
             <Row justify="space-between" align="middle">
               <Col>
                 <Text type="secondary">
-                  Tìm thấy {documents.length} tài liệu
+                  Tìm thấy {totalElements} tài liệu
+                  {totalPages > 1 && ` (trang ${currentPage + 1}/${totalPages})`}
                 </Text>
               </Col>
               {hasActiveFilters && (
@@ -260,20 +272,24 @@ const Search: React.FC = () => {
               ))}
             </Row>
 
-            {hasMore && (
-              <div style={{ textAlign: 'center', marginTop: '24px' }}>
-                <Button
-                  type="primary"
-                  size="large"
-                  onClick={handleLoadMore}
-                  loading={isLoading}
+            {totalPages > 1 && (
+              <div style={{ textAlign: 'center', marginTop: '32px' }}>
+                <Pagination
+                  current={currentPage + 1}
+                  total={totalElements}
+                  pageSize={pageSize}
+                  showSizeChanger
+                  showQuickJumper
+                  showTotal={(total, range) => 
+                    `${range[0]}-${range[1]} của ${total} tài liệu`
+                  }
+                  pageSizeOptions={['6', '12', '24', '48']}
+                  onChange={handlePageChange}
+                  onShowSizeChange={handlePageChange}
                   style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    border: 'none'
+                    display: 'inline-block'
                   }}
-                >
-                  {isLoading ? 'Đang tải...' : 'Tải thêm'}
-                </Button>
+                />
               </div>
             )}
           </>

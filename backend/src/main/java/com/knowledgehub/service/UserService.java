@@ -3,6 +3,8 @@ package com.knowledgehub.service;
 import com.knowledgehub.entity.User;
 import com.knowledgehub.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -52,5 +54,26 @@ public class UserService {
     
     public boolean validatePassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+    
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+    
+    public Page<User> findAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+    
+    public Page<User> searchUsers(String search, Pageable pageable) {
+        return userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrFullNameContainingIgnoreCase(
+                search, search, search, pageable);
+    }
+    
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+    
+    public void deleteById(String id) {
+        userRepository.deleteById(id);
     }
 }

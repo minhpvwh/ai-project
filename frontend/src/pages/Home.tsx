@@ -24,11 +24,31 @@ const Home: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const data = await homeApi.getDashboard();
-      setDashboardData(data || {
-        newestDocuments: [],
-        popularDocuments: [],
-        userDocuments: []
-      });
+      console.log('Dashboard data received:', data);
+      
+      // Transform DocumentDto to Document
+      const transformDocuments = (documents: any[]) => 
+        documents.map(dto => ({
+          ...dto,
+          filePath: '', // Add missing filePath property
+          owner: {
+            id: dto.ownerId,
+            username: dto.ownerName,
+            fullName: dto.ownerName,
+            email: '',
+            roles: [],
+            createdAt: ''
+          }
+        }));
+
+      const transformedData = {
+        newestDocuments: transformDocuments(data?.newestDocuments || []),
+        popularDocuments: transformDocuments(data?.popularDocuments || []),
+        userDocuments: transformDocuments(data?.userDocuments || [])
+      };
+      
+      console.log('Transformed dashboard data:', transformedData);
+      setDashboardData(transformedData);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       message.error('Không thể tải dữ liệu trang chủ');

@@ -4,15 +4,23 @@ import {
   HomeOutlined, 
   UploadOutlined, 
   SearchOutlined, 
-  FileTextOutlined, 
-  UserOutlined 
+  TeamOutlined
 } from '@ant-design/icons';
+import { useAuthStore } from '@/stores/authStore';
 
 const { Sider } = Layout;
 const { Title } = Typography;
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const { user } = useAuthStore();
+
+  const isAdmin = user?.roles?.includes('ADMIN');
+  
+  // Debug logging
+  console.log('Sidebar - User:', user);
+  console.log('Sidebar - User roles:', user?.roles);
+  console.log('Sidebar - Is Admin:', isAdmin);
 
   const menuItems = [
     { 
@@ -33,6 +41,12 @@ const Sidebar: React.FC = () => {
       icon: <SearchOutlined />,
       path: '/search'
     },
+    ...(isAdmin ? [{
+      key: '/admin/users',
+      label: 'Quản trị người dùng',
+      icon: <TeamOutlined />,
+      path: '/admin/users'
+    }] : []),
   ];
 
   return (

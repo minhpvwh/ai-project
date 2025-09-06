@@ -61,9 +61,9 @@ public class HomeController {
             Page<DocumentDto> userDtos = userDocuments.map(DocumentDto::new);
             
             Map<String, Object> response = new HashMap<>();
-            response.put("recentDocuments", recentDtos.getContent());
+            response.put("newestDocuments", recentDtos.getContent());
             response.put("popularDocuments", popularDtos.getContent());
-            response.put("myRecentDocuments", userDtos.getContent());
+            response.put("userDocuments", userDtos.getContent());
             
             return ResponseEntity.ok(response);
             

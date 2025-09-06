@@ -105,7 +105,7 @@ export interface DocumentSearchRequest {
 }
 
 export interface DocumentSearchResponse {
-  content: Document[];
+  content: DocumentDto[];
   totalElements: number;
   totalPages: number;
   size: number;

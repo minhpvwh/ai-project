@@ -72,6 +72,7 @@ const DocumentDetail: React.FC = () => {
         }
       };
       setDocument(transformedDocument);
+      console.log('Document ownerId:', data.ownerId, 'Current user id:', user?.id);
       setIsOwner(data.ownerId === user?.id);
     } catch (error: any) {
       console.error('Error fetching document details:', error);
@@ -112,12 +113,14 @@ const DocumentDetail: React.FC = () => {
 
   const handleRatingChange = async (rating: number) => {
     try {
+      console.log('Rating change:', rating, 'Document ID:', id);
       await ratingApi.addOrUpdateRating(id!, rating);
       setUserRating(rating);
       message.success('Đánh giá đã được cập nhật');
       // Refresh document to get updated rating
       fetchDocumentDetails();
     } catch (error) {
+      console.error('Rating error:', error);
       message.error('Không thể cập nhật đánh giá');
     }
   };
@@ -140,9 +143,21 @@ const DocumentDetail: React.FC = () => {
   const handleDownload = async () => {
     try {
       const data = await documentApi.download(id!);
-      // In a real app, you would handle file download here
+      
+      // Create blob URL and trigger download
+      const blob = new Blob([data], { type: document?.fileType || 'application/octet-stream' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = document?.fileName || 'document';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
       message.success('Tải file thành công');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Download error:', error);
       message.error('Không thể tải file');
     }
   };
@@ -263,7 +278,10 @@ const DocumentDetail: React.FC = () => {
             <Space size="large" style={{ marginBottom: '16px' }}>
               <Space>
                 <UserOutlined style={{ color: '#8c8c8c' }} />
-                <Text type="secondary">{document.owner?.username || 'Unknown'}</Text>
+                <Text type="secondary">
+                  {document.owner?.username || 'Unknown'}
+                  {isOwner && <Tag color="blue" size="small" style={{ marginLeft: '8px' }}>Owner</Tag>}
+                </Text>
               </Space>
               <Space>
                 <CalendarOutlined style={{ color: '#8c8c8c' }} />
@@ -359,6 +377,12 @@ const DocumentDetail: React.FC = () => {
                 <Descriptions.Item label="Kích thước">
                   <Text>{formatFileSize(document.fileSize)}</Text>
                 </Descriptions.Item>
+                <Descriptions.Item label="Người upload">
+                  <Space>
+                    <Text>{document.owner?.username || 'Unknown'}</Text>
+                    {isOwner && <Tag color="blue" size="small">Owner</Tag>}
+                  </Space>
+                </Descriptions.Item>
                 <Descriptions.Item label="Ngày tạo">
                   <Text>{new Date(document.createdAt).toLocaleDateString('vi-VN')}</Text>
                 </Descriptions.Item>
@@ -398,7 +422,7 @@ const DocumentDetail: React.FC = () => {
                   Đánh giá của bạn:
                 </Text>
                 <RatingStars
-                  rating={userRating || 0}
+                  rating={userRating || undefined}
                   onRatingChange={handleRatingChange}
                   interactive={true}
                   size="lg"

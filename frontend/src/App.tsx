@@ -7,7 +7,9 @@ import Home from '@/pages/Home';
 import Upload from '@/pages/Upload';
 import Search from '@/pages/Search';
 import DocumentDetail from '@/pages/DocumentDetail';
+import UserManagement from '@/pages/UserManagement';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import AdminRoute from '@/components/AdminRoute';
 
 const App: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
@@ -41,6 +43,11 @@ const App: React.FC = () => {
                 <Route path="upload" element={<Upload />} />
                 <Route path="search" element={<Search />} />
                 <Route path="document/:id" element={<DocumentDetail />} />
+                <Route path="admin/users" element={
+                  <AdminRoute>
+                    <UserManagement />
+                  </AdminRoute>
+                } />
               </Route>
             </Routes>
           </div>

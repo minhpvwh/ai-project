@@ -17,6 +17,7 @@ const RatingStars: React.FC<RatingStarsProps> = ({
   const [hoverRating, setHoverRating] = useState<number>(0);
 
   const handleChange = (value: number) => {
+    console.log('RatingStars handleChange:', value, 'interactive:', interactive);
     if (interactive && onRatingChange) {
       onRatingChange(value);
     }
@@ -36,7 +37,7 @@ const RatingStars: React.FC<RatingStarsProps> = ({
 
   return (
     <Rate
-      value={hoverRating || rating}
+      value={hoverRating || (rating > 0 ? rating : undefined)}
       onChange={handleChange}
       onHoverChange={handleHoverChange}
       onHoverLeave={handleHoverLeave}
