@@ -12,7 +12,7 @@ import {
   Empty, 
   Descriptions,
   Modal,
-  message
+  App
 } from 'antd';
 import { 
   ArrowLeftOutlined, 
@@ -20,8 +20,8 @@ import {
   EyeOutlined, 
   CalendarOutlined, 
   UserOutlined, 
-  TagOutlined, 
-  StarOutlined,
+  TagsOutlined, 
+  StarFilled,
   EditOutlined,
   DeleteOutlined,
   FileTextOutlined
@@ -39,6 +39,7 @@ import { Document, Comment, Rating } from '@/types';
 const { Title, Text, Paragraph } = Typography;
 
 const DocumentDetail: React.FC = () => {
+  const { message } = App.useApp();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -301,7 +302,7 @@ const DocumentDetail: React.FC = () => {
               <Card title="Tags">
                 <Space wrap>
                   {document.tags.map((tag, index) => (
-                    <Tag key={index} icon={<TagOutlined />}>
+                    <Tag key={index} icon={<TagsFilled />}>
                       {tag}
                     </Tag>
                   ))}
@@ -359,7 +360,7 @@ const DocumentDetail: React.FC = () => {
             <Card title="Đánh giá">
               <div style={{ textAlign: 'center', marginBottom: '16px' }}>
                 <Space align="center" style={{ marginBottom: '8px' }}>
-                  <StarOutlined style={{ fontSize: '24px', color: '#faad14' }} />
+                  <StarFilled style={{ fontSize: '24px', color: '#faad14' }} />
                   <Title level={2} style={{ margin: 0, color: '#faad14' }}>
                     {document.averageRating.toFixed(1)}
                   </Title>

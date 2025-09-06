@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { Form, Input, Button, Card, Typography, Space, Divider } from 'antd';
+import { Form, Input, Button, Card, Typography, Space, Divider, App } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, LoginOutlined, UserAddOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/stores/authStore';
 import { authApi } from '@/api/authApi';
-import { message } from 'antd';
 import { LoginRequest, RegisterRequest } from '@/types';
 
 const { Title, Text } = Typography;
 
 const Login: React.FC = () => {
+  const { message } = App.useApp();
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [form] = Form.useForm();

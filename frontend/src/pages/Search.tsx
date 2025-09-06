@@ -12,7 +12,8 @@ import {
   Empty, 
   Spin,
   Tag,
-  Divider
+  Divider,
+  App
 } from 'antd';
 import { 
   SearchOutlined, 
@@ -22,7 +23,6 @@ import {
 } from '@ant-design/icons';
 import { documentApi } from '@/api/documentApi';
 import DocumentCard from '@/components/DocumentCard';
-import { message } from 'antd';
 import { Document, DocumentSearchRequest, DocumentSearchResponse } from '@/types';
 
 const { Title, Text } = Typography;
@@ -36,6 +36,7 @@ interface SearchFilters {
 }
 
 const Search: React.FC = () => {
+  const { message } = App.useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);

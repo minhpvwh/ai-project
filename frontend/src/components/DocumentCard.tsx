@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Card, Tag, Space, Typography, Button, Row, Col, Statistic } from 'antd';
-import { CalendarOutlined, UserOutlined, EyeOutlined, StarOutlined, TagOutlined } from '@ant-design/icons';
+import { Card, Tag, Space, Typography, Button, Row, Col } from 'antd';
+import { CalendarOutlined, UserOutlined, EyeOutlined, StarFilled, TagsOutlined } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Document } from '@/types';
@@ -101,7 +101,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
         <div style={{ marginBottom: '12px' }}>
           <Space wrap size={[4, 4]}>
             {document.tags.slice(0, 3).map((tag, index) => (
-              <Tag key={index} icon={<TagOutlined />} size="small">
+              <Tag key={index} icon={<TagsOutlined />} size="small">
                 {tag}
               </Tag>
             ))}
@@ -139,7 +139,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
       <Row justify="space-between" align="middle">
         <Col>
           <Space size="small">
-            <StarOutlined style={{ color: '#faad14' }} />
+            <StarFilled style={{ color: '#faad14' }} />
             <Text strong style={{ fontSize: '14px' }}>
               {document.averageRating.toFixed(1)}
             </Text>

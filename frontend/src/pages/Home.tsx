@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, Row, Col, Statistic, Typography, Spin, Empty, Button, Space } from 'antd';
-import { FileTextOutlined, TrendingUpOutlined, ClockCircleOutlined, UserOutlined, PlusOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Statistic, Typography, Spin, Empty, Button, Space, App } from 'antd';
+import { FileTextOutlined, RiseOutlined, ClockCircleOutlined, UserOutlined, PlusOutlined } from '@ant-design/icons';
 import { homeApi } from '@/api/homeApi';
 import DocumentCard from '@/components/DocumentCard';
-import { message } from 'antd';
 import { HomeData, Document } from '@/types';
 
 const { Title, Text } = Typography;
 
 const Home: React.FC = () => {
+  const { message } = App.useApp();
   const [dashboardData, setDashboardData] = useState<HomeData>({
     newestDocuments: [],
     popularDocuments: [],
@@ -24,9 +24,20 @@ const Home: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const data = await homeApi.getDashboard();
-      setDashboardData(data);
+      setDashboardData(data || {
+        newestDocuments: [],
+        popularDocuments: [],
+        userDocuments: []
+      });
     } catch (error) {
+      console.error('Error fetching dashboard data:', error);
       message.error('Không thể tải dữ liệu trang chủ');
+      // Set default data on error
+      setDashboardData({
+        newestDocuments: [],
+        popularDocuments: [],
+        userDocuments: []
+      });
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +81,7 @@ const Home: React.FC = () => {
             <Card>
               <Statistic
                 title="Tài liệu mới"
-                value={dashboardData.newestDocuments.length}
+                value={dashboardData?.newestDocuments?.length || 0}
                 prefix={<FileTextOutlined style={{ color: '#1890ff' }} />}
               />
             </Card>
@@ -79,8 +90,8 @@ const Home: React.FC = () => {
             <Card>
               <Statistic
                 title="Tài liệu nổi bật"
-                value={dashboardData.popularDocuments.length}
-                prefix={<TrendingUpOutlined style={{ color: '#52c41a' }} />}
+                value={dashboardData?.popularDocuments?.length || 0}
+                prefix={<RiseOutlined style={{ color: '#52c41a' }} />}
               />
             </Card>
           </Col>
@@ -88,7 +99,7 @@ const Home: React.FC = () => {
             <Card>
               <Statistic
                 title="Tài liệu của tôi"
-                value={dashboardData.userDocuments.length}
+                value={dashboardData?.userDocuments?.length || 0}
                 prefix={<UserOutlined style={{ color: '#faad14' }} />}
               />
             </Card>
@@ -121,9 +132,9 @@ const Home: React.FC = () => {
             </Link>
           </div>
           
-          {dashboardData.newestDocuments.length > 0 ? (
+          {(dashboardData?.newestDocuments?.length || 0) > 0 ? (
             <Row gutter={[16, 16]}>
-              {dashboardData.newestDocuments.map((document: Document) => (
+              {(dashboardData?.newestDocuments || []).map((document: Document) => (
                 <Col xs={24} sm={12} lg={8} key={document.id}>
                   <DocumentCard document={document} />
                 </Col>
@@ -146,7 +157,7 @@ const Home: React.FC = () => {
             marginBottom: '16px' 
           }}>
             <Space>
-              <TrendingUpOutlined style={{ color: '#667eea' }} />
+              <RiseOutlined style={{ color: '#667eea' }} />
               <Title level={3} style={{ margin: 0 }}>Tài liệu nổi bật</Title>
             </Space>
             <Link to="/search" style={{ color: '#667eea' }}>
@@ -154,9 +165,9 @@ const Home: React.FC = () => {
             </Link>
           </div>
           
-          {dashboardData.popularDocuments.length > 0 ? (
+          {(dashboardData?.popularDocuments?.length || 0) > 0 ? (
             <Row gutter={[16, 16]}>
-              {dashboardData.popularDocuments.map((document: Document) => (
+              {(dashboardData?.popularDocuments || []).map((document: Document) => (
                 <Col xs={24} sm={12} lg={8} key={document.id}>
                   <DocumentCard document={document} />
                 </Col>
@@ -164,7 +175,7 @@ const Home: React.FC = () => {
             </Row>
           ) : (
             <Empty 
-              image={<TrendingUpOutlined style={{ fontSize: '48px', color: '#d9d9d9' }} />}
+              image={<RiseOutlined style={{ fontSize: '48px', color: '#d9d9d9' }} />}
               description="Chưa có tài liệu nổi bật nào"
             />
           )}
@@ -187,9 +198,9 @@ const Home: React.FC = () => {
             </Link>
           </div>
           
-          {dashboardData.userDocuments.length > 0 ? (
+          {(dashboardData?.userDocuments?.length || 0) > 0 ? (
             <Row gutter={[16, 16]}>
-              {dashboardData.userDocuments.map((document: Document) => (
+              {(dashboardData?.userDocuments || []).map((document: Document) => (
                 <Col xs={24} sm={12} lg={8} key={document.id}>
                   <DocumentCard document={document} />
                 </Col>

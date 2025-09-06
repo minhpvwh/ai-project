@@ -8,7 +8,7 @@ import {
   Avatar, 
   Empty,
   Modal,
-  message
+  App
 } from 'antd';
 import { 
   SendOutlined, 
@@ -40,6 +40,7 @@ const CommentBox: React.FC<CommentBoxProps> = ({
   onCommentUpdated, 
   onCommentDeleted 
 }) => {
+  const { message } = App.useApp();
   const [newComment, setNewComment] = useState<string>('');
   const [editingComment, setEditingComment] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>('');

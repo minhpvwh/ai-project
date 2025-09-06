@@ -12,8 +12,11 @@ import {
   Row, 
   Col,
   Progress,
-  Alert
+  Alert,
+  App
 } from 'antd';
+
+const { Dragger } = Upload;
 import { 
   UploadOutlined, 
   FileOutlined, 
@@ -23,14 +26,14 @@ import {
   InfoCircleOutlined
 } from '@ant-design/icons';
 import { documentApi } from '@/api/documentApi';
-import { message } from 'antd';
 import { DocumentFormData } from '@/types';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-const Upload: React.FC = () => {
+const UploadPage: React.FC = () => {
+  const { message } = App.useApp();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -162,7 +165,7 @@ const Upload: React.FC = () => {
           {/* File Upload */}
           <Card title="Chọn file" style={{ marginBottom: '24px' }}>
             {!selectedFile ? (
-              <Upload.Dragger
+              <Dragger
                 name="file"
                 multiple={false}
                 beforeUpload={() => false}
@@ -182,7 +185,7 @@ const Upload: React.FC = () => {
                 <p className="ant-upload-hint" style={{ fontSize: '14px' }}>
                   Hỗ trợ: PDF, DOC, DOCX, JPG, PNG (tối đa 10MB)
                 </p>
-              </Upload.Dragger>
+              </Dragger>
             ) : (
               <Card 
                 size="small"
@@ -353,4 +356,4 @@ const Upload: React.FC = () => {
   );
 }
 
-export default Upload
+export default UploadPage
