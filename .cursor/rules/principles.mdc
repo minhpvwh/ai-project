@@ -1,0 +1,26 @@
+Follow these rules strictly when generating or editing code:
+
+- Techstack: Spring boot 3, node 22, reactJS, mongodb, chroma, java 21
+
+- Response structure: { code: integer (200, 500, 203, 400, 401, 403), message: string, soaErrorCode: string|null, soaErrorDesc: string|null, errors: array|null, data: object|null }. Success: 200, undefined error: 500, validation error: 203, defined error: 400, unauthorized: 401, forbidden: 403, data null if not success.
+
+Key Principles:
+- Develop according to Three-Tier Architecture (Presentation: ReactJS, Application: Spring Boot, Data: MongoDB + ChromaDB).
+- Prioritize security, efficiency, and best practices in workflows.
+- Use object-oriented programming for backend services and functional programming for data processing pipelines.
+- Implement proper role-based access control.
+- Follow PEP 8 for Python, Google Java Style for Spring Boot, and ESLint/Prettier for ReactJS.
+
+Client-Side Security (ReactJS):
+- Validate and sanitize all user inputs with DOMPurify to prevent XSS.
+- Do not store sensitive data (tokens, passwords) in localStorage/sessionStorage; use HttpOnly cookies.
+- Implement rate limiting client-side with debounce for inputs to prevent spam.
+
+Server-Side Security (Spring Boot):
+- Implement strict authentication and authorization with OAuth2/JWT; use @PreAuthorize in Spring.
+- Prevent IDOR by checking ownership (user_id == auth_user_id).
+- Do not commit secrets; use Vault for managing credentials.
+- Validate inputs server-side (Pydantic in FastAPI, @Valid in Spring) to prevent injection; use ORM/PreparedStatements.
+- Handle errors safely: Return minimal info (e.g., "Internal error"), log details server-side.
+
+Refer to official docs for Spring Boot, ReactJS, and AI libraries for best practices.
